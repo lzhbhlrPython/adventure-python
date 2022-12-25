@@ -1,3 +1,33 @@
-/test/
+test
 test.*
 *.test
+
+# MacOS
+.DS_Store
+*/.Trash
+*/.Spotlight-V100
+*/.Trashes
+*/.fseventsd
+*/.DocumentRevisions-V100
+*/.TemporaryItems
+*/.AppleDB
+*/.AppleDesktop
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.*.swp
+.*.swo
+*.un~
+*.swp
+*.swo
+
+#vscode
+.vscode
+
+#pycharm
+.idea
