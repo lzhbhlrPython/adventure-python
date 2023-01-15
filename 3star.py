@@ -93,6 +93,22 @@ while True:
                 track1 = []
                 track2 = []
                 track3 = []
+            elif event.key == pygame.K_1:
+                # 定义三星的初始位置
+                star1 = np.array([0.97000436, -0.24308753], dtype=np.float64)
+                star2 = np.array([-0.97000436, 0.24308753], dtype=np.float64)
+                star3 = np.array([0, 0], dtype=np.float64)
+                # 定义三星的初始速度
+                v1 = np.array([0.4662036850, 0.4323657300], dtype=np.float64)
+                v2 = np.array([-0.4662036850, -0.4323657300], dtype=np.float64)
+                v3 = np.array([0, 0], dtype=np.float64)
+                # 定义三星的质量
+                m1 = 1
+                m2 = 1
+                m3 = 1
+                track1 = []
+                track2 = []
+                track3 = []
 
 
     # 计算星体之间的引力
