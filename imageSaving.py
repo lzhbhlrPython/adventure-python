@@ -85,7 +85,7 @@ def save_to_file(data, file_path):
 if __name__ == '__main__':
     import sys
     if len(sys.argv) != 4:
-        print('Usage: python3 imageSaving_v2.py <input file> <output file> <mode>')
+        print('Usage: python3 imageSaving.py <input file> <output file> <mode>')
         exit(0)
     input_file = sys.argv[1]
     output_file = sys.argv[2]
