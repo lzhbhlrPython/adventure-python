@@ -28,7 +28,6 @@ class ABOGeneEnum(GeneEnum):
     O_PURE = "OO"
     AB_1 = "AB"
     AB_2 = "BA"
-    O = "OO"
 
 class RhFactorEnum(GeneEnum):
     POSITIVE_PURE = "RR"
@@ -44,7 +43,7 @@ def blood_test(abo: str, rh: str) -> Ty.Optional[BloodTypeEnum]:
             return BloodTypeEnum.B_POSITIVE
         elif abo == ABOGeneEnum.AB_1.value or abo == ABOGeneEnum.AB_2.value:
            return BloodTypeEnum.AB_POSITIVE
-        elif abo == ABOGeneEnum.O_PURE.value or abo == ABOGeneEnum.O.value:
+        elif abo == ABOGeneEnum.O_PURE.value:
             return BloodTypeEnum.O_POSITIVE
         else:
             print(f"Invalid ABO gene: {abo}")
@@ -56,7 +55,7 @@ def blood_test(abo: str, rh: str) -> Ty.Optional[BloodTypeEnum]:
             return BloodTypeEnum.B_NEGATIVE
         elif abo == ABOGeneEnum.AB_1.value or abo == ABOGeneEnum.AB_2.value:
             return BloodTypeEnum.AB_NEGATIVE
-        elif abo == ABOGeneEnum.O_PURE.value or abo == ABOGeneEnum.O.value:
+        elif abo == ABOGeneEnum.O_PURE.value:
             return BloodTypeEnum.O_NEGATIVE
         else:
             print(f"Invalid ABO gene: {abo}")
@@ -120,15 +119,13 @@ class Blood:
     def __add__(self, other):
         if not isinstance(other, Blood):
             raise ValueError("Can only add another Blood instance")
-        # Randomly choose one gene from each blood type
-        new_ABO_pwd1 = random.choice(self.abo_gene.value)
-        new_ABO_pwd2 = random.choice(other.abo_gene.value)
-        new_ABO_gene = ABOGeneEnum(new_ABO_pwd1 + new_ABO_pwd2)
+        allele1 = random.choice([self.abo_gene.value[0], self.abo_gene.value[1]])
+        allele2 = random.choice([other.abo_gene.value[0], other.abo_gene.value[1]])
+        new_ABO_gene = ABOGeneEnum(allele1 + allele2)
 
-        new_RH_pwd1 = random.choice(self.rh_factor.value)
-        new_RH_pwd2 = random.choice(other.rh_factor.value)
-        new_rh_factor = RhFactorEnum(new_RH_pwd1 + new_RH_pwd2)
-        # Create a new Blood instance with the combined genes
+        allele1_rh = random.choice([self.rh_factor.value[0], self.rh_factor.value[1]])
+        allele2_rh = random.choice([other.rh_factor.value[0], other.rh_factor.value[1]])
+        new_rh_factor = RhFactorEnum(allele1_rh + allele2_rh)
 
         return Blood(new_ABO_gene, new_rh_factor)
 
@@ -171,6 +168,16 @@ class CrowdStudy:
     def get_population(self) -> Ty.List[Blood]:
         return self.population
     
+    def __len__(self):
+        return len(self.population)
+    
+    def __str__(self) -> str:
+        return f"CrowdStudy(population_size={self.population_size}, current_population_size={len(self.population)})"
+    
+    def details(self) -> Ty.List[str]:
+        return [str(blood) for blood in self.population]
+    
+    
 def analyze_population(crowd_study: CrowdStudy) -> Ty.Dict[str, Ty.Dict[str, Ty.Any]]:
     population = crowd_study.get_population()
     blood_type_counts = {}
@@ -182,9 +189,6 @@ def analyze_population(crowd_study: CrowdStudy) -> Ty.Dict[str, Ty.Dict[str, Ty.
 
     data= {}
     for blood_type, count in blood_type_counts.items():
-        print(f"Blood Type: {blood_type.value}")
-        print(f"Count: {count}")
-        print(f"Percentage: {count / len(population) * 100:.3f}%")
         data[blood_type.value] = {'count': count,
                                   'percentage': count / len(population) * 100,
                                   'blood_type': blood_type
@@ -192,50 +196,30 @@ def analyze_population(crowd_study: CrowdStudy) -> Ty.Dict[str, Ty.Dict[str, Ty.
     
     return data
 def main():
-    initial_population_size = 10
-    born_size = 1000000
-    city_population = CrowdStudy(initial_population_size)
-    """    
-    city_population = CrowdStudy(0)
-    for i in tqdm.tqdm(range(int(initial_population_size/2)), colour='#99ff99', desc='初始化人群A'):
-        # 生成随机的ABO和Rh因子
-        ABO_gene = "AO"
-        Rh_gene = "Rr"
-        # 创建Blood实例
-        abo_gene_enum = gene_string2_gene_enum(ABO_gene)
-        rh_factor_enum = gene_string2_gene_enum(Rh_gene)
-        if abo_gene_enum is None or rh_factor_enum is None:
-            raise ValueError(f"Invalid gene string: ABO={ABO_gene}, Rh={Rh_gene}")
-        blood = Blood(abo_gene_enum, rh_factor_enum)
-        city_population.add_blood(blood)
-    for i in tqdm.tqdm(range(int(initial_population_size/2)), colour='#99ff99', desc='初始化人群B'):
-        ABO_gene = "BO"
-        Rh_gene = "Rr"
-        # 创建Blood实例
-        abo_gene_enum = gene_string2_gene_enum(ABO_gene)
-        rh_factor_enum = gene_string2_gene_enum(Rh_gene)
-        if abo_gene_enum is None or rh_factor_enum is None:
-            raise ValueError(f"Invalid gene string: ABO={ABO_gene}, Rh={Rh_gene}")
-        blood = Blood(abo_gene_enum, rh_factor_enum)
-        city_population.add_blood(blood)
-    """
-    print("Initial Population:")
-    print("Analyzing Population:")
-    initial_data = analyze_population(city_population)
+    initial_population_size = 10000
+    born_size = 5000000
+    initial_city_population = CrowdStudy(0)
+    # 初始化人群
+    for _ in tqdm.tqdm(range(initial_population_size//2), colour='#99ff99', desc='初始化人群'):
+        blood = Blood(ABOGeneEnum.A_MIXED_1, RhFactorEnum.POSITIVE_MIXED_1)
+        initial_city_population.add_blood(blood)
+        blood = Blood(ABOGeneEnum.B_MIXED_1, RhFactorEnum.POSITIVE_MIXED_1)
+        initial_city_population.add_blood(blood)
+    final_city_population = CrowdStudy(0)
+    initial_data = analyze_population(initial_city_population)
     for _ in tqdm.tqdm(range(born_size), colour='#ff9999', desc='模拟出生人口'):
         #city_population.add_blood(random.choice(city_population.get_population())+random.choice(city_population.get_population()))
-        parent1 = random.randint(0, len(city_population.population) - 1)
-        parent2 = random.randint(0, len(city_population.population) - 1)
+        parent1 = random.randint(0, len(initial_city_population.population) - 1)
+        parent2 = random.randint(0, len(initial_city_population.population) - 1)
         while parent1 == parent2:
-            parent2 = random.randint(0, len(city_population.population) - 1)
-        blood1 = city_population.population[parent1]
-        blood2 = city_population.population[parent2]
+            parent2 = random.randint(0, len(initial_city_population.population) - 1)
+        blood1 = initial_city_population.population[parent1]
+        blood2 = initial_city_population.population[parent2]
         new_blood = blood1 + blood2
-        city_population.add_blood(new_blood)
-    print("\nPopulation After Adding New Blood Types:")
-    for _ in tqdm.tqdm(range(initial_population_size), colour='#ff9999', desc='死亡初始人口'):
-        city_population.population.pop(_)
-    final_data=analyze_population(city_population)
+        final_city_population.add_blood(new_blood)
+        
+    
+    final_data=analyze_population(final_city_population)
     
     # 绘制两张饼图左右对比
     plt.style.use('ggplot')  # 使用ggplot样式
@@ -260,7 +244,7 @@ def main():
         data1.append(value['count'])
         colors1.append(blood_type_colors[value['blood_type'].value])
     
-    plt.title('Initial Population Blood Types'+'\n'+'Population Size: ' + str(initial_population_size))
+    plt.title('Initial Population Blood Types'+'\n'+'Population Size: ' + str(len(initial_city_population)))
     plt.pie(data1, labels=labels1, autopct='%1.1f%%', startangle=140, colors=colors1)
 
     plt.subplot(1, 2, 2)
@@ -276,7 +260,7 @@ def main():
         data2.append(value['count'])
         colors2.append(blood_type_colors[value['blood_type'].value])
     
-    plt.title('Final Population Blood Types'+'\n'+'Population Size: ' + str(len(city_population.population)))
+    plt.title('Final Population Blood Types'+'\n'+'Population Size: ' + str(len(final_city_population)))
     plt.pie(data2, labels=labels2, autopct='%1.1f%%', startangle=140, colors=colors2)
     
     plt.tight_layout()
